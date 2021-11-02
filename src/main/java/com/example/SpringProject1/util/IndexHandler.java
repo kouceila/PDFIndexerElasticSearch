@@ -1,0 +1,101 @@
+package com.example.SpringProject1.util;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.*;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.UUIDs;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class IndexHandler {
+
+    private  RestHighLevelClient client;
+    @Autowired
+    @Qualifier("getTags")
+    private List<String> tags;
+
+    @Autowired
+    public IndexHandler(RestHighLevelClient client, List<String> tags) throws IOException {
+        this.client = client;
+        this.tags = tags;
+        createIndex("cvindex", 1, 1);
+    }
+
+    public  void createIndex(String name, int shards, int replicas) throws IOException
+    {
+        if (!client.indices().exists(new org.elasticsearch.client.indices.GetIndexRequest(name), RequestOptions.DEFAULT))
+        {
+            CreateIndexRequest request = new CreateIndexRequest(name);
+            request.settings(Settings.builder().put("index.number_of_shards", shards).put("index.number_of_replicas", replicas));
+            CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
+            System.out.println("response id: " + createIndexResponse.index());
+        }
+        else{
+            System.out.println("Index " + name +" already exists");
+        }
+    }
+
+
+    public  List<String> search(String skill) throws IOException {
+        final String DIR ="src/main/java/com/example/SpringProject1/Docs";
+        SearchSourceBuilder builder = new SearchSourceBuilder()
+                .postFilter(QueryBuilders.matchQuery("textContent",skill));
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.searchType(SearchType.DFS_QUERY_THEN_FETCH);
+        searchRequest.source(builder);
+
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHit[] searchHits = response.getHits().getHits();
+
+        List<CV> res =
+                Arrays.stream(searchHits)
+                        .map(hit -> new CV(hit.getSourceAsMap().get("filename").toString(), hit.getSourceAsMap().get("content").toString()))
+                        .collect(Collectors.toList());
+
+        for ( CV e : res ){
+            PDFParser.decode(e.getEncoded(), Paths.get(DIR, e.getFilename()).toString());
+
+        }
+
+        return res.stream().map(e->e.getFilename()).collect(Collectors.toList());
+    }
+
+    public void handleUpload(MultipartFile file) throws IOException {
+        String textContent = PDFParser.parse(file.getBytes());
+
+        IndexRequest indexRequest = new IndexRequest("cvindex");
+        String fileEncoded = PDFParser.encodePdfBase64(file.getInputStream());
+        StringBuilder fbuilder = new StringBuilder(file.getOriginalFilename());
+        fbuilder.insert(fbuilder.indexOf(".pdf"), UUID.randomUUID());
+        XContentBuilder builder = XContentFactory.jsonBuilder().startObject().field("filename",fbuilder.toString()).field("textContent",textContent).field("content",fileEncoded).endObject();
+        indexRequest.source(builder);
+        IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
+        System.out.println("response id: "+indexResponse.getId());
+    }
+}
