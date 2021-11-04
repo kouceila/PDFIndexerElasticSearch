@@ -15,17 +15,9 @@ import java.util.stream.Collectors;
 public class PDFParser {
 
     private static String content ;
-    public static void parse(String path) throws IOException {
-        //Loading an existing document
-        File file = new File(path);
-        PDDocument document = Loader.loadPDF(file);
-        //Instantiate PDFTextStripper class
-        PDFTextStripper pdfStripper = new PDFTextStripper();
-        //Retrieving text from PDF document
-        content = pdfStripper.getText(document);
-        //Closing the document
-        document.close();
-    }
+
+
+
 
     public static String parse(byte [] bytes) throws IOException {
         //Loading an existing document
@@ -37,22 +29,6 @@ public class PDFParser {
         //Closing the document
         document.close();
         return content;
-    }
-
-
-
-    public static String encodePdfBase64(String path) {
-        try {
-            InputStream inputStream = new FileInputStream(new File(path));
-            byte[]  fileByteStream = IOUtils.toByteArray(inputStream );
-            String base64String = new String(Base64.getEncoder().encodeToString(fileByteStream).getBytes(),"UTF-8");
-            String strEncoded = Base64.getEncoder().encodeToString( base64String.getBytes( "utf-8" ));
-            inputStream.close();
-            return strEncoded;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static String encodePdfBase64(InputStream fileInputStream) {
@@ -77,14 +53,4 @@ public class PDFParser {
         fos.write(Base64.getDecoder().decode(new String( decodedStr, "utf-8" )));
         fos.close();
     }
-
-    public static void main(String[] args) throws IOException {
-        parse("/Users/koceilaazg/Documents/Spring_learning/SpringProject1/src/main/java/com/example/SpringProject1/Docs/CV.pdf");
-        //processContent();
-
-        String fileEncoded = encodePdfBase64("/Users/koceilaazg/Documents/Spring_learning/SpringProject1/src/main/java/com/example/SpringProject1/Docs/CV.pdf");
-        //decode(fileEncoded);
-
-    }
-
 }
