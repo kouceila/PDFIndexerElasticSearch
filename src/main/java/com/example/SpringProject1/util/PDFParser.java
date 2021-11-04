@@ -16,9 +16,6 @@ public class PDFParser {
 
     private static String content ;
 
-
-
-
     public static String parse(byte [] bytes) throws IOException {
         //Loading an existing document
         PDDocument document = Loader.loadPDF(bytes);
@@ -46,7 +43,6 @@ public class PDFParser {
     }
 
     public static void decode(String strEncoded,String saveRep) throws IOException {
-
         byte[] decodedStr = Base64.getDecoder().decode( strEncoded );
 
         FileOutputStream fos = new FileOutputStream(saveRep);

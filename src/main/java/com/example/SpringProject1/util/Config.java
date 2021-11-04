@@ -17,9 +17,4 @@ public class Config {
         return new RestHighLevelClient(
                 RestClient.builder(new HttpHost("localhost", 9200, "http")));
     }
-
-    @Bean("getTags")
-    public List<String> getTags(){
-        return List.of("java", "python", "cpp", "c");
-    }
 }

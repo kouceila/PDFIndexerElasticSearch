@@ -32,14 +32,12 @@ import java.util.stream.Collectors;
 public class IndexHandler {
     private final String INDEX = "cvindex";
     private final RestHighLevelClient client;
-    @Autowired
-    @Qualifier("getTags")
-    private final List<String> tags;
+
 
     @Autowired
-    public IndexHandler(RestHighLevelClient client, List<String> tags) throws IOException {
+    public IndexHandler(RestHighLevelClient client) throws IOException {
         this.client = client;
-        this.tags = tags;
+
         createIndex(INDEX, 1, 1);
     }
 
@@ -74,7 +72,6 @@ public class IndexHandler {
 
         for (CV e : res) {
             PDFParser.decode(e.getEncoded(), Paths.get(DIR, e.getFilename()).toString());
-
         }
 
         return res.stream().map(e -> e.getFilename()).collect(Collectors.toList());

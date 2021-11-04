@@ -19,15 +19,13 @@ public class CVController {
 
 
     @PostMapping("/upload")
-    public void upload(@RequestParam("file")MultipartFile file) throws IOException {
-
-        System.out.println("Here");
+    public String upload(@RequestParam("file")MultipartFile file) throws IOException {
         indexHandler.handleUpload(file);
+        return "File " + file.getOriginalFilename() + " uploaded successfully" ;
     }
 
     @GetMapping("/search/{skill}")
     public List<String> getFileName(@PathVariable(name = "skill") String skill) throws IOException {
-
         return indexHandler.search(skill);
     }
 }
