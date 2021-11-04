@@ -41,6 +41,13 @@ public class IndexHandler {
         createIndex(INDEX, 1, 1);
     }
 
+    /**
+     *
+     * @param name : index name
+     * @param shards : number of shards
+     * @param replicas : number of replicas
+     * @throws IOException
+     */
     public void createIndex(String name, int shards, int replicas) throws IOException {
         if (!client.indices().exists(new org.elasticsearch.client.indices.GetIndexRequest(name), RequestOptions.DEFAULT)) {
             CreateIndexRequest request = new CreateIndexRequest(name);
@@ -52,6 +59,12 @@ public class IndexHandler {
         }
     }
 
+    /**
+     *
+     * @param skill : the key word to look for
+     * @return  A list of file names containing the skill
+     * @throws IOException
+     */
     public List<String> search(String skill) throws IOException {
         final String DIR = "src/main/java/com/example/SpringProject1/Docs";
         SearchSourceBuilder builder = new SearchSourceBuilder()
@@ -77,6 +90,11 @@ public class IndexHandler {
         return res.stream().map(e -> e.getFilename()).collect(Collectors.toList());
     }
 
+    /**
+     *
+     * @param file : The file that will be parsed and indexed
+     * @throws IOException
+     */
     public void handleUpload(MultipartFile file) throws IOException {
         String textContent = PDFParser.parse(file.getBytes());
 

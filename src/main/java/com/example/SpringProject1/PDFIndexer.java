@@ -12,6 +12,4 @@ public class PDFIndexer {
 		SpringApplication.run(PDFIndexer.class, args);
 	}
 
-
-
 }
