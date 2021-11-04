@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,7 @@ public class IndexHandler {
     public List<String> search(String skill) throws IOException {
         final String DIR = "src/main/java/com/example/SpringProject1/Docs";
         SearchSourceBuilder builder = new SearchSourceBuilder()
-                .postFilter(QueryBuilders.matchQuery("textContent", skill));
+                .postFilter(QueryBuilders.matchQuery("textContent", skill.toLowerCase()));
 
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.searchType(SearchType.DFS_QUERY_THEN_FETCH);
@@ -90,7 +91,7 @@ public class IndexHandler {
                 .jsonBuilder()
                 .startObject()
                 .field("filename", fbuilder.toString())
-                .field("textContent", textContent)
+                .field("textContent", textContent.toLowerCase())
                 .field("content", fileEncoded)
                 .endObject();
         indexRequest.source(builder);
