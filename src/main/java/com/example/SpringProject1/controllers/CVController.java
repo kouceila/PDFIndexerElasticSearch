@@ -1,6 +1,7 @@
-package com.example.SpringProject1.util;
+package com.example.SpringProject1.controllers;
 
 
+import com.example.SpringProject1.services.IndexHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

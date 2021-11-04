@@ -1,5 +1,7 @@
-package com.example.SpringProject1.util;
+package com.example.SpringProject1.services;
 
+import com.example.SpringProject1.util.CV;
+import com.example.SpringProject1.util.PDFParser;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
